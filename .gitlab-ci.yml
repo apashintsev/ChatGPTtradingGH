@@ -1,0 +1,29 @@
+stages:
+  - build
+  - deploy
+
+docker-build-chatgpttrading-back:
+  image: docker:latest
+  stage: build
+  tags:
+    - chatgpttrading
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" registry.gitlab.com
+  script:
+    - docker build -t registry.gitlab.com/av.pashintsev/chatgpttrading-back:latest .
+    - docker push registry.gitlab.com/av.pashintsev/chatgpttrading-back:latest
+  only:
+    - master
+
+docker-run-chatgpttrading-compose:
+  image: docker:latest
+  stage: deploy
+  tags:
+    - chatgpttrading
+  before_script:
+    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" registry.gitlab.com
+  script:
+    - docker compose -p chatgpttrading --file docker-compose.yml --file docker-compose.ci.override.yml up -d --force-recreate --remove-orphans
+#  when: manual
+  only:
+    - master

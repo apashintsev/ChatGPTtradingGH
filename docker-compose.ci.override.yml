@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+  chatgpttrading-back:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.chatgpt-trading.ru`)"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.entrypoints=https"
+      - "traefik.http.routers.backend.tls.certresolver=le"
+      - "traefik.http.middlewares.backend-compress.compress=true"
+      - "traefik.http.routers.backend.middlewares=backend-compress"
+      - "traefik.http.routers.backend.service=backend_service"
+      - "traefik.http.services.backend_service.loadbalancer.server.port=80"
+    networks:
+      - chatgpttrading
+
+  front:
+    image: registry.gitlab.com/av.pashintsev/chatgpttrading-front:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`chatgpt-trading.ru`,`www.chatgpt-trading.ru`)"
+      - "traefik.http.routers.front.tls=true"
+      - "traefik.http.routers.front.entrypoints=https"
+      - "traefik.http.routers.front.tls.certresolver=le"
+      - "traefik.http.middlewares.front-compress.compress=true"
+      - "traefik.http.routers.front.middlewares=front-compress"
+      - "traefik.http.routers.front.service=front_service"
+      - "traefik.http.services.front_service.loadbalancer.server.port=80"
+    networks:
+      - chatgpttrading
+
+  db:
+    ports: []
